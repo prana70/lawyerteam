@@ -6,7 +6,7 @@ import os
 
 #根据能力定级返回律师的能力系数
 def get_acoefficient(AbilityLevel):
-    df=pd.read_excel('律师能力等级及薪酬.xlsx')
+    df=pd.read_excel(os.getcwd()+'\\config\\律师能力等级及薪酬.xlsx')
     df1=df[df.能力等级==AbilityLevel]
     return df1.iloc[0,7]
 
@@ -17,7 +17,7 @@ if __name__=='__main__':
     df=pd.read_excel(os.getcwd()+'\lawyerfee\\'+ProgramName+'.xlsx')[['提交人','办理日期','耗费时间']]
 
 
-    ListOfPayedLawyers=list(pd.read_excel('授薪律师名单.xlsx')['姓名'])#提取授薪律师姓名构建列表
+    ListOfPayedLawyers=list(pd.read_excel(os.getcwd()+'\\config\\授薪律师名单.xlsx')['姓名'])#提取授薪律师姓名构建列表
 
 
 
@@ -58,7 +58,7 @@ if __name__=='__main__':
     df4['扣税比例（%）']=21
 
     #根据律师身份判断扣税比例，并计算应分扣税律师费
-    DFOfLawyerRole=pd.read_excel('律师身份.xlsx')
+    DFOfLawyerRole=pd.read_excel(os.getcwd()+'\\config\\律师身份.xlsx')
 
     ListOfIndependentLawyers=list(DFOfLawyerRole[DFOfLawyerRole.身份=='独立律师']['姓名'])
     for line in df4.index:
@@ -68,5 +68,5 @@ if __name__=='__main__':
     df4['应分扣税律师费（元）']=df4['应分含税律师费（元）']*(1-df4['扣税比例（%）']/100)
     print(df4.round(2))
 
-    df4.round(2).to_csv(os.getcwd()+'\lawyerfee\\'+ProgramName+'律师费分配.csv')
+    df4.round(2).to_csv(os.getcwd()+'\\report\\lawyerfee\\'+ProgramName+'律师费分配.csv')
 
