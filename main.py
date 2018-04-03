@@ -76,7 +76,7 @@ if __name__=='__main__':
     df1=pd.read_excel(os.getcwd()+'\\config\\项目库.xlsx')
     df2=pd.read_excel(os.getcwd()+'\\data\\数据导出.xlsx')
     for index,row in df1.iterrows():
-        if not pd.isnull(row['终止日期']):
+        if not pd.isnull(row['终止日期']) and '浦' in row['客户名称']:
             print(50*'*')
             print(row['客户名称'],row['项目名称'])
             print(50*'*')
@@ -113,4 +113,6 @@ if __name__=='__main__':
             df4['扣税比例']=df4.apply(lambda row:GetTaxRatio(row['分配主体']),axis=1)
             df4['应分配税后律师费']= df4['应分配税前律师费']*(1-df4['扣税比例'])
             print(df4[['分配主体','可分配律师费','有效工作时间','分配比例','应分配税前律师费','扣税比例','应分配税后律师费']])
+            df4[['分配主体','可分配律师费','有效工作时间','分配比例','应分配税前律师费','扣税比例','应分配税后律师费']]. \
+            to_csv(os.getcwd()+'\\report\\lawyerfee\\'+row['客户名称']+'_'+row['项目名称']+'.csv',index=False)
     
