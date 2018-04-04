@@ -12,6 +12,7 @@ pd.options.display.float_format = '{:,.2f}'.format
 
 def MakeRegularExpression(str): #根据输入的关键字str生成正则表达式
     SplitChar=r'[\s\,\;\，\；\、\.\。]'
+    print(str)
     SubStrs=re.split('\|',str)
     expressions=[]
     for SubStr in SubStrs:
@@ -76,7 +77,9 @@ if __name__=='__main__':
     df1=pd.read_excel(os.getcwd()+'\\config\\项目库.xlsx')
     df2=pd.read_excel(os.getcwd()+'\\data\\数据导出.xlsx')
     for index,row in df1.iterrows():
-        if not pd.isnull(row['终止日期']) and '浦' in row['客户名称']:
+        file=os.getcwd()+'\\report\\lawyerfee\\'+row['客户名称']+'_'+row['项目名称']+'_律师费分配.csv' #生成最终要生成的项目律师费分配文件名
+        if not os.path.exists(file) and not pd.isnull(row['终止日期']): # and '浦' in row['客户名称']: #如果具有生成文件名的文件不存在，并且项目已终止，则往下生成，否则不管
+            
             print(50*'*')
             print(row['客户名称'],row['项目名称'])
             print(50*'*')
@@ -90,9 +93,9 @@ if __name__=='__main__':
                 LawyerFee=0
             
             CustomerExpression=MakeRegularExpression(row['客户名称关键字']) #客户名称关键字的正则表达式
-            print('客户名称关键字正则表达式：',CustomerExpression)
+            #print('客户名称关键字正则表达式：',CustomerExpression)
             ProgramExpression=MakeRegularExpression(row['项目名称关键字'])
-            print('项目名称关键字正则表达式：',ProgramExpression)
+            #print('项目名称关键字正则表达式：',ProgramExpression)
 
 
             df3=df2[(df2.客户名称.str.match(CustomerExpression))& #通过设定客户名称、项目名称等条件生成项目明细库
@@ -104,15 +107,16 @@ if __name__=='__main__':
             df3['能力系数']=df3.apply(lambda row:GetAbilityFactor(row['提交人'],row['办理日期']),axis=1)
             df3['分配主体']=df3.apply(lambda row:GetOwner(row['提交人'],row['办理日期']),axis=1)
             df3['有效工作时间']=df3['耗费时间']*df3['能力系数']
-            #print(df3)
-            df4=df3.groupby('分配主体',as_index=False)['有效工作时间'].sum()
+            print(df3)
+            df4=df3.groupby('分配主体',as_index=False)['耗费时间','有效工作时间'].sum()
             df4['总时间']=df4['有效工作时间'].sum()
             df4['分配比例']=df4['有效工作时间']/df4['总时间']
             df4['可分配律师费']=LawyerFee
             df4['应分配税前律师费']=df4['可分配律师费']*df4['分配比例']
             df4['扣税比例']=df4.apply(lambda row:GetTaxRatio(row['分配主体']),axis=1)
             df4['应分配税后律师费']= df4['应分配税前律师费']*(1-df4['扣税比例'])
-            print(df4[['分配主体','可分配律师费','有效工作时间','分配比例','应分配税前律师费','扣税比例','应分配税后律师费']])
-            df4[['分配主体','可分配律师费','有效工作时间','分配比例','应分配税前律师费','扣税比例','应分配税后律师费']]. \
-            to_csv(os.getcwd()+'\\report\\lawyerfee\\'+row['客户名称']+'_'+row['项目名称']+'.csv',index=False)
+            #print(df4[['分配主体','可分配律师费','有效工作时间','分配比例','应分配税前律师费','扣税比例','应分配税后律师费']])
+            df4[['分配主体','可分配律师费','耗费时间','有效工作时间','分配比例','应分配税前律师费','扣税比例','应分配税后律师费']]. \
+            to_csv(file,index=False)
+            print('生成完毕！')
     
