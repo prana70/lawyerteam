@@ -38,34 +38,39 @@ if __name__=='__main__':
     StartYear=year_
     EndYear=year_
 
+    FileName=os.getcwd()+'\\report\\salary\\授薪律师工资（'+year_+'年'+month_+'月).csv'
 
-    StartMonth=str(int(month_)-1)
-    EndMonth=month_
+    if not os.path.exists(FileName):
+        StartMonth=str(int(month_)-1)
+        EndMonth=month_
 
-    if int(EndMonth)<10:
-        EndMonth='0'+EndMonth
-        
-    if StartMonth=='0':
-        StartMonth='12'
-        StartYear=str(int(StartYear)-1)
-    elif int(StartMonth)<10:
-        StartMonth='0'+StartMonth
+        if int(EndMonth)<10:
+            EndMonth='0'+EndMonth
+            
+        if StartMonth=='0':
+            StartMonth='12'
+            StartYear=str(int(StartYear)-1)
+        elif int(StartMonth)<10:
+            StartMonth='0'+StartMonth
 
-    StartDate=StartYear+'-'+StartMonth+'-26'
-    EndDate=EndYear+'-'+EndMonth+'-26'
-    print(StartDate,'至',EndDate)
+        StartDate=StartYear+'-'+StartMonth+'-26'
+        EndDate=EndYear+'-'+EndMonth+'-26'
+        print(StartDate,'至',EndDate)
 
-    #获取授薪律师姓名列表
-    df=pd.read_excel(os.getcwd()+'\\config\\授薪律师名单.xlsx')
-    names=df['姓名']
+        #获取授薪律师姓名列表
+        df=pd.read_excel(os.getcwd()+'\\config\\授薪律师名单.xlsx')
+        names=df['姓名']
 
-    f=open(os.getcwd()+'\\report\\salary\\授薪律师工资（'+year_+'年'+month_+'月).csv','w')
-    f.write('姓名,基本工资(元),工作时间（分钟）,奖金（元）,合计（元）\n')
-    for name in names:
-        TimeConsuming=get_time_consuming(name,StartDate,EndDate)
-        AbilityLevel=get_ability_level(name,EndDate)
-        BasicSalary,BonusCoefficient=get_bsalary_bcoefficient(AbilityLevel)
-        print('计算并写入%s的工资......'%name)
-        f.write(name+','+format(BasicSalary,'0.0f')+','+format(TimeConsuming,'0.0f')+','+format(TimeConsuming/60*BonusCoefficient,'0.0f')+','+format((BasicSalary+TimeConsuming/60*BonusCoefficient),'0.0f')+'\n')
-    print('OK!所有人的工资已计算并写入完成！')
-    f.close()
+        f=open(FileName,'w')
+        f.write('姓名,基本工资(元),工作时间（分钟）,奖金（元）,合计（元）\n')
+        for name in names:
+            TimeConsuming=get_time_consuming(name,StartDate,EndDate)
+            AbilityLevel=get_ability_level(name,EndDate)
+            BasicSalary,BonusCoefficient=get_bsalary_bcoefficient(AbilityLevel)
+            print('计算并写入%s的工资......'%name)
+            f.write(name+','+format(BasicSalary,'0.0f')+','+format(TimeConsuming,'0.0f')+','+format(TimeConsuming/60*BonusCoefficient,'0.0f')+','+format((BasicSalary+TimeConsuming/60*BonusCoefficient),'0.0f')+'\n')
+        print('OK!所有人的工资已计算并写入完成！')
+        f.close()
+    else:
+        print('当月工资表已存在，请勿重新生成！')
+    
