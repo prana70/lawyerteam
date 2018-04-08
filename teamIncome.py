@@ -12,6 +12,6 @@ for file in fileList:
     df=pd.read_csv(fileName,encoding='gbk')
     df['项目']=file[:-10]
     print(df.columns)
-    print(df[' 应分配税后律师费 '])
-    #df2=df[['分配主体','应分配税后律师费']]
+    #print(df[' 应分配税后律师费 '])
+    df2=df[['分配主体',' 应分配税后律师费 ']]
     #print(df2)
