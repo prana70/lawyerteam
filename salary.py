@@ -54,7 +54,7 @@ if __name__=='__main__':
             StartMonth='0'+StartMonth
 
         StartDate=StartYear+'-'+StartMonth+'-26'
-        EndDate=EndYear+'-'+EndMonth+'-26'
+        EndDate=EndYear+'-'+EndMonth+'-30'
         print(StartDate,'至',EndDate)
 
         #获取授薪律师姓名列表
