@@ -9,6 +9,7 @@ import os
 #根据姓名、起止日期返回律师工作时间
 def get_time_consuming(name,StartDate,EndDate):
     df=pd.read_excel(os.getcwd()+'\\data\\数据导出.xlsx')
+    print(df[(df.提交人==name) & (df.提交时间>=StartDate) & (df.提交时间<=EndDate)])
     return df[(df.提交人==name) & (df.提交时间>=StartDate) & (df.提交时间<EndDate)]['耗费时间'].sum()
 
 
@@ -35,27 +36,13 @@ if __name__=='__main__':
     year_=input('请输入年份：')
     month_=input('请输入月份：')
 
-    StartYear=year_
-    EndYear=year_
 
     FileName=os.getcwd()+'\\report\\salary\\授薪律师工资（'+year_+'年'+month_+'月).csv'
 
     if not os.path.exists(FileName):
-        StartMonth=str(int(month_)-1)
-        EndMonth=month_
-
-        if int(EndMonth)<10:
-            EndMonth='0'+EndMonth
-            
-        if StartMonth=='0':
-            StartMonth='12'
-            StartYear=str(int(StartYear)-1)
-        elif int(StartMonth)<10:
-            StartMonth='0'+StartMonth
-
-        StartDate=StartYear+'-'+StartMonth+'-26'
-        EndDate=EndYear+'-'+EndMonth+'-30'
-        print(StartDate,'至',EndDate)
+        StartDate=input('请输入起始日期：')
+        EndDate=input('请输入结束日期：')
+        print(StartDate,'至',EndDate+'(不包括)')
 
         #获取授薪律师姓名列表
         df=pd.read_excel(os.getcwd()+'\\config\\授薪律师名单.xlsx')
