@@ -4,8 +4,9 @@ import os
 import pandas as pd
 
 dir=os.getcwd()+'\\report\\salary\\'
+print(dir)
 fileList=os.listdir(dir)
-#print(fileList)
+print(fileList)
 
 
 finalDf=pd.DataFrame(columns=['项目','姓名','合计（元）'])
