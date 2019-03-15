@@ -12,7 +12,7 @@ pd.options.display.float_format = '{:,.2f}'.format
 
 def MakeRegularExpression(str): #根据输入的关键字str生成正则表达式
     SplitChar=r'[\s\,\;\，\；\、\.\。]'
-    print(str)
+    #print(str)
     SubStrs=re.split('\|',str)
     expressions=[]
     for SubStr in SubStrs:
@@ -76,6 +76,31 @@ def GetTaxRatio(name): #根分配主体的名称，返回相的扣税比例
 if __name__=='__main__':
     df1=pd.read_excel(os.getcwd()+'\\config\\项目库.xlsx')
     df2=pd.read_excel(os.getcwd()+'\\data\\数据导出.xlsx')
+    #print('最初行数：',len(df2))
+    df2=df2[df2.办理日期>='2017-10-01']
+    #print('次初行数：',len(df2))
+    #i=0
+    for index,row in df1.iterrows():
+        CustomerExpression=MakeRegularExpression(row['客户名称关键字']) #客户名称关键字的正则表达式
+        #print('客户名称关键字正则表达式：',CustomerExpression)
+        ProgramExpression=MakeRegularExpression(row['项目名称关键字'])
+        #print('项目名称关键字正则表达式：',ProgramExpression)
+        df2=df2[~((df2.客户名称.str.match(CustomerExpression))& #通过设定客户名称、项目名称等条件生成项目明细库
+                (df2.项目名称.str.match(ProgramExpression))&
+                (df2.办理日期>=str(row['起始日期'])[:10])& #时间戳转换成str去掉多余的时间，以便于比较,下同
+                (df2.办理日期<=str(row['终止日期'])[:10]))]. \
+                fillna({'耗费时间':0,'涉及标的':0})
+        #i+=1
+        #print('第',i,'次筛后行数：',len(df2))
+    #print('最终行数：',len(df2))
+    df2['分配主体']=df2.apply(lambda row:GetOwner(row['提交人'],row['办理日期']),axis=1) #将工作记录归属到分配主体（合伙人、独立律师或团队）
+    #df2=df2[df2.分配主体.str.contains('团队')] #筛选出归属到团队的工作记录
+    print(df2)
+    df2.to_csv(os.getcwd()+'\\report\\unprojected.csv')
+
+    '''
+    df1=pd.read_excel(os.getcwd()+'\\config\\项目库.xlsx')
+    df2=pd.read_excel(os.getcwd()+'\\data\\数据导出.xlsx')
     for index,row in df1.iterrows():
         file=os.getcwd()+'\\report\\lawyerfee\\'+row['客户名称']+'_'+row['项目名称']+'_律师费分配.csv' #生成最终要生成的项目律师费分配文件名
         if not os.path.exists(file) and not pd.isnull(row['终止日期']): # and '浦' in row['客户名称']: #如果具有生成文件名的文件不存在，并且项目已终止，则往下生成，否则不管
@@ -119,4 +144,5 @@ if __name__=='__main__':
             df4[['分配主体','可分配律师费','耗费时间','有效工作时间','分配比例','应分配税前律师费','扣税比例','应分配税后律师费']]. \
             to_csv(file,index=False)
             print('生成完毕！')
+            '''
     

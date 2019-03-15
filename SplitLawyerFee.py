@@ -76,6 +76,7 @@ def GetTaxRatio(name): #根分配主体的名称，返回相的扣税比例
 if __name__=='__main__':
     df1=pd.read_excel(os.getcwd()+'\\config\\项目库.xlsx')
     df2=pd.read_excel(os.getcwd()+'\\data\\数据导出.xlsx')
+    df1=df1[df1.办案律师费>0] #剔除未完成的项目，或者已完成但没有律师费的项目。
     for index,row in df1.iterrows():
         file=os.getcwd()+'\\report\\lawyerfee\\'+row['客户名称']+'_'+row['项目名称']+'_律师费分配.csv' #生成最终要生成的项目律师费分配文件名
         if not os.path.exists(file) and not pd.isnull(row['终止日期']): # and '浦' in row['客户名称']: #如果具有生成文件名的文件不存在，并且项目已终止，则往下生成，否则不管
