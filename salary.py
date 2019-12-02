@@ -2,7 +2,7 @@
 
 
 import pandas as pd
-
+import datetime as dt
 import os
 
 
@@ -11,7 +11,6 @@ def get_time_consuming(name,StartDate,EndDate):
     df=pd.read_excel(os.getcwd()+'\\data\\数据导出.xlsx')
     print(df[(df.提交人==name) & (df.提交时间>=StartDate) & (df.提交时间<=EndDate)])
     return df[(df.提交人==name) & (df.提交时间>=StartDate) & (df.提交时间<EndDate)]['耗费时间'].sum()
-
 
 #根据姓名,指定日期返回律师的当前能力定级
 def get_ability_level(name,OppointedDate):
@@ -42,7 +41,7 @@ if __name__=='__main__':
     if not os.path.exists(FileName):
         StartDate=input('请输入起始日期：')
         EndDate=input('请输入结束日期：')
-        print(StartDate,'至',EndDate+'(不包括)')
+        print(StartDate,'至',EndDate,'(不包括)')
 
         #获取授薪律师姓名列表
         df=pd.read_excel(os.getcwd()+'\\config\\授薪律师名单.xlsx')
@@ -55,7 +54,7 @@ if __name__=='__main__':
             AbilityLevel=get_ability_level(name,EndDate)
             BasicSalary,BonusCoefficient=get_bsalary_bcoefficient(AbilityLevel)
             print('计算并写入%s的工资......'%name)
-            f.write(name+','+format(BasicSalary,'0.0f')+','+format(TimeConsuming,'0.0f')+','+format(TimeConsuming/60*BonusCoefficient,'0.0f')+','+format((BasicSalary+TimeConsuming/60*BonusCoefficient),'0.0f')+'\n')
+            f.write(name+','+format(BasicSalary,'0.0f')+','+format(TimeConsuming,'0.0f')+','+format(TimeConsuming/60*BonusCoefficient,'0.0f')+','+format((BasicSalary+TimeConsuming/60*BonusCoefficient),'0.0f')+'\n') #
         print('OK!所有人的工资已计算并写入完成！')
         f.close()
     else:
