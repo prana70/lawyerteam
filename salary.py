@@ -4,13 +4,17 @@
 import pandas as pd
 import datetime as dt
 import os
+from sqlalchemy import create_engine
 
 
-#根据姓名、起止日期返回律师工作时间
+#根据姓名、起止日期返回律师填报的工作时间，注意：截止日期当日记录不包括
 def get_time_consuming(name,StartDate,EndDate):
-    df=pd.read_excel(os.getcwd()+'\\data\\数据导出.xlsx')
-    print(df[(df.提交人==name) & (df.提交时间>=StartDate) & (df.提交时间<=EndDate)])
-    return df[(df.提交人==name) & (df.提交时间>=StartDate) & (df.提交时间<EndDate)]['耗费时间'].sum()
+    #df=pd.read_excel(os.getcwd()+'\\data\\数据导出.xlsx')
+    #print(df[(df.提交人==name) & (df.提交时间>=StartDate) & (df.提交时间<=EndDate)])
+    #return df[(df.提交人==name) & (df.提交时间>=StartDate) & (df.提交时间<EndDate)]['耗费时间'].sum()
+    engine=create_engine('sqlite:///data.db')
+    df=pd.read_sql('worklog',engine)
+    return df[(df.填报人==name) & (df.填报时间>=StartDate) & (df.填报时间<EndDate)]['耗费时间'].sum()
 
 #根据姓名,指定日期返回律师的当前能力定级
 def get_ability_level(name,OppointedDate):
@@ -39,8 +43,11 @@ if __name__=='__main__':
     FileName=os.getcwd()+'\\report\\salary\\授薪律师工资（'+year_+'年'+month_+'月).csv'
 
     if not os.path.exists(FileName):
-        StartDate=input('请输入起始日期：')
-        EndDate=input('请输入结束日期：')
+        StartDate=str(dt.date(int(year_),int(month_),1))  #input('请输入起始日期：')
+        if int(month_)==12:
+            EndDate=str(dt.date(int(year_)+1,1,1))
+        else:
+            EndDate=str(dt.date(int(year_),int(month_)+1,1))   #input('请输入结束日期：')
         print(StartDate,'至',EndDate,'(不包括)')
 
         #获取授薪律师姓名列表

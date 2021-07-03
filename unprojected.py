@@ -5,6 +5,8 @@ import re
 import os
 import salary as sl
 import lawyerfee as lf
+from sqlalchemy import create_engine
+import datetime
 
 pd.options.display.float_format = '{:,.2f}'.format
 
@@ -46,9 +48,9 @@ def GetOwner(name,date): #根据律师（提交人）姓名、办理日期，返
     df1=pd.read_excel(os.getcwd()+'\\config\\律师身份.xlsx')
     df2=df1[df1.姓名==name].sort_values(by=['取得日期'],ascending=False)
     for index,row in df2.iterrows():
-        if date>=str(row['取得日期'])[:10]:
+        if date.date()>=row['取得日期'].date():
             if row['身份']=='授薪律师':
-                if date>='2017-10-01':
+                if date.date()>=datetime.date(2017,10,1):
                     return '团队（%s）'%name
                 else:
                     return '王彬（%s）'%name
@@ -75,11 +77,10 @@ def GetTaxRatio(name): #根分配主体的名称，返回相的扣税比例
 
 if __name__=='__main__':
     df1=pd.read_excel(os.getcwd()+'\\config\\项目库.xlsx')
-    df2=pd.read_excel(os.getcwd()+'\\data\\数据导出.xlsx')
-    #print('最初行数：',len(df2))
-    df2=df2[df2.办理日期>='2017-10-01']
-    #print('次初行数：',len(df2))
-    #i=0
+    #df2=pd.read_excel(os.getcwd()+'\\data\\数据导出.xlsx')
+    engine=create_engine('sqlite:///data.db')
+    df2=pd.read_sql('worklog',engine)
+    print('最初行数：',len(df2))
     for index,row in df1.iterrows():
         CustomerExpression=MakeRegularExpression(row['客户名称关键字']) #客户名称关键字的正则表达式
         #print('客户名称关键字正则表达式：',CustomerExpression)
@@ -87,16 +88,17 @@ if __name__=='__main__':
         #print('项目名称关键字正则表达式：',ProgramExpression)
         df2=df2[~((df2.客户名称.str.match(CustomerExpression))& #通过设定客户名称、项目名称等条件生成项目明细库
                 (df2.项目名称.str.match(ProgramExpression))&
-                (df2.办理日期>=str(row['起始日期'])[:10])& #时间戳转换成str去掉多余的时间，以便于比较,下同
-                (df2.办理日期<=str(row['终止日期'])[:10]))]. \
+                (df2.办理日期.dt.date>=row['起始日期'].date())& 
+                (df2.办理日期.dt.date<=row['终止日期'].date()))]. \
                 fillna({'耗费时间':0,'涉及标的':0})
-        #i+=1
-        #print('第',i,'次筛后行数：',len(df2))
-    #print('最终行数：',len(df2))
-    df2['分配主体']=df2.apply(lambda row:GetOwner(row['提交人'],row['办理日期']),axis=1) #将工作记录归属到分配主体（合伙人、独立律师或团队）
+    df2['分配主体']=df2.apply(lambda row:GetOwner(row['填报人'],row['办理日期']),axis=1) #将工作记录归属到分配主体（合伙人、独立律师或团队）
     #df2=df2[df2.分配主体.str.contains('团队')] #筛选出归属到团队的工作记录
-    print(df2)
+    print('最终行数：',len(df2))
     df2.to_csv(os.getcwd()+'\\report\\unprojected.csv')
+
+
+
+
 
     '''
     df1=pd.read_excel(os.getcwd()+'\\config\\项目库.xlsx')
@@ -129,7 +131,7 @@ if __name__=='__main__':
                     (df2.办理日期<=str(row['终止日期'])[:10])]. \
                     fillna({'耗费时间':0,'涉及标的':0}) 
             #print(df3)
-            df3['能力系数']=df3.apply(lambda row:GetAbilityFactor(row['提交人'],row['办理日期']),axis=1)
+            df3['能力系数']=df3.apply(lambda row:GetAbilityFactor(row['填报人'],row['办理日期']),axis=1)
             df3['分配主体']=df3.apply(lambda row:GetOwner(row['提交人'],row['办理日期']),axis=1)
             df3['有效工作时间']=df3['耗费时间']*df3['能力系数']
             print(df3)
