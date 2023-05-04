@@ -26,7 +26,8 @@ def MakeFullWorklog(start_date,end_date): #生成指定起止期间的归属项�
     start_time=time.clock()
     engine=create_engine('sqlite:///data.db')
     worklog_df=pd.read_sql('worklog',engine)
-    worklog_df=worklog_df[(worklog_df.办理日期>=start_date)&(worklog_df.办理日期<=end_date)]
+    print(worklog_df.dtypes)
+    worklog_df=worklog_df[(worklog_df.办理日期.dt.date>=start_date)&(worklog_df.办理日期.dt.date<=end_date)]
     print('初始记录数：',len(worklog_df))
 
     project_df=pd.read_excel(os.getcwd()+'\\config\\项目库.xlsx')
